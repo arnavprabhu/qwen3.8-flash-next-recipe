@@ -18,7 +18,7 @@ High-performance local deployment of **Qwen3.8-Flash-Next** on Apple Silicon usi
 
 | Component | Specification |
 |---|---|
-| **Target Machine** | MacBook Pro (Apple M5 Pro, 64 GB Unified Memory or higher) |
+| **Target Machine** | Apple Silicon Mac with 64 GB+ Unified Memory (M-series Pro / Max / Ultra) |
 | **Model** | AtomicChat `Qwen3.8-Flash-Next-AD-3.84bpw-IQ4_XS-M64` |
 | **Model Shards** | 28 GGUF shards (`00001-of-00028.gguf` to `00028-of-00028.gguf`, ~79 GB disk) |
 | **Model ID / Alias** | `qwen3.8-flash-next` |
@@ -57,9 +57,11 @@ brew install macmon
 Clone the official `llama.cpp` repository inside the project directory and compile it with Metal enabled:
 
 ```bash
-cd "/Users/arnav/Desktop/AI Models"
+# Clone this recipe repository and enter the directory
+git clone https://github.com/arnavprabhu/qwen3.8-flash-next-recipe.git
+cd qwen3.8-flash-next-recipe
 
-# Clone llama.cpp if not already present
+# Clone llama.cpp inside the project directory
 git clone https://github.com/ggerganov/llama.cpp.git
 
 # Configure build with Metal GPU backend
@@ -98,7 +100,7 @@ ls -lh models/Qwen3.8-Flash-Next-AD-3.84bpw-IQ4_XS-M64/Qwen3.8-Flash-Next-AD-3.8
 
 ### Step 4: Configure Environment Settings
 
-Configuration defaults are maintained in [`.env.qwen38`](file:///Users/arnav/Desktop/AI%20Models/.env.qwen38). If starting fresh:
+Configuration defaults are maintained in [`.env.qwen38`](.env.qwen38) (template: [`.env.qwen38.example`](.env.qwen38.example)). If starting fresh:
 
 ```bash
 cp .env.qwen38.example .env.qwen38
@@ -142,7 +144,7 @@ Expected output:
  PID:          52753
  Port:         9999
  API Base URL: http://127.0.0.1:9999/v1
- Logs:         /Users/arnav/Desktop/AI Models/logs/qwen38.log
+ Logs:         <project-root>/logs/qwen38.log
 
 Testing http://127.0.0.1:9999/v1/models...
 API Endpoint:  HEALTHY (200 OK)
@@ -353,7 +355,7 @@ Open `http://localhost:3000` to chat.
 ## Directory Structure
 
 ```text
-/Users/arnav/Desktop/AI Models/
+qwen3.8-flash-next-recipe/
 ├── .env.qwen38                   # Active server configuration
 ├── .env.qwen38.example           # Configuration template
 ├── .gitignore                    # Excludes models/, llama.cpp/, logs/
