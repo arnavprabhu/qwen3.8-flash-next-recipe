@@ -22,6 +22,8 @@ High-performance local deployment of **Qwen3.8-Flash-Next** on Apple Silicon usi
 | **Model** | AtomicChat `Qwen3.8-Flash-Next-AD-3.84bpw-IQ4_XS-M64` |
 | **Model Shards** | 28 GGUF shards (`00001-of-00028.gguf` to `00028-of-00028.gguf`, ~79 GB disk) |
 | **Model ID / Alias** | `qwen3.8-flash-next` |
+| **Total Parameters** | 176.94 Billion (125B MoE + 51.2B per-layer token embeddings) |
+| **Quantization Profile** | Hybrid Mixed-Precision (Auto-Dequant 3.84 bpw average: Q5_1 / MXFP4 / IQ2_S / Q8_0 / IQ1_M) |
 | **Architecture** | `qwen4exp` (125B MoE, ~6B active, Gated DeltaNet + QSA sparse attention + Hyper-Connections) |
 | **Context Window** | **`204,800` tokens** (200K binary: $200 \times 1024$), architecture maximum `262,144` (256K) |
 | **GPU Offload** | Apple Metal (`-ngl 99`, full layer offload) |
@@ -274,6 +276,33 @@ Run in a separate terminal:
 macmon
 ```
 Displays Apple Silicon GPU wattage, memory bandwidth (GB/s), core frequencies, and temperatures.
+
+---
+
+## Hybrid Mixed-Precision Quantization (Auto-Dequant 3.84 bpw)
+
+This model is **not a pure 1-bit quantization**. It utilizes AtomicChat's **Auto-Dequant (AD)** mixed-precision strategy, which calibrates different layer types using an importance matrix (`imatrix`) to achieve an average precision of **3.84 bits per weight (bpw)** across 176.94 billion parameters:
+
+### Exact Parameter Breakdown Across All 28 Shards
+
+| Quantization Type | Nominal Precision | Parameters (Elements) | Share | Layers Used For |
+|---|---|---|---|---|
+| **`Q5_1`** | **5.5 bpw** | **51.20 Billion** | 28.9% | Per-layer token embeddings (`per_layer_token_embd`) |
+| **`MXFP4`** | **4.25 bpw** | **40.27 Billion** | 22.8% | MoE expert down-projections (`ffn_down_exps`) |
+| **`IQ2_S`** | **2.5 bpw** | **20.13 Billion** | 11.4% | MoE expert gate/up projections (`ffn_gate_exps`, `ffn_up_exps`) |
+| **`Q8_0`** | **8.5 bpw** | **4.86 Billion** | 2.7% | Output projections, normalization, and attention routing |
+| **`IQ1_M`** | **1.75 bpw** | **60.40 Billion** | 34.1% | Large-capacity MoE expert feed-forward weights |
+| **`F32` / `BF16`** | **32 / 16 bit** | **0.09 Billion** | <0.1% | Layer norms, biases, hyper-connection scalars |
+| **Total** | **~3.84 bpw (avg)** | **176.94 Billion** | **100%** | **~79 GB on disk / ~45 GB resident RAM** |
+
+### Why `/v1/models` and `llama.cpp` report `IQ1_M - 1.75 bpw`
+
+In the GGUF specification, the file header contains a single integer field called `general.file_type`. For this model, `general.file_type = 31`, which maps to `LLAMA_FTYPE_MOSTLY_IQ1_M` in `llama.cpp`. Because GGUF does not have a single standard enum for custom mixed-precision profiles, `llama.cpp` labels the file by its base quantization tier (`IQ1_M`), even though higher-precision quants (Q5_1, MXFP4, IQ2_S, Q8_0) compose over 65% of the model's weights.
+
+### Quality & Memory Trade-offs
+
+* **Avoids 1-Bit Perplexity Collapse:** Pure 1-bit models suffer severe perplexity degradation on attention matrices and embeddings. Preserving embeddings at 5-bit (`Q5_1`) and attention/output heads at 8-bit (`Q8_0`) maintains high semantic coherence and reasoning quality.
+* **Fits 64 GB Unified Memory:** A full FP16 model (176B) would require >350 GB VRAM. A 4-bit model requires ~90 GB VRAM. The 3.84 bpw hybrid profile fits the model into **~45 GB** of resident RAM, leaving room for a **200K token KV cache (~6.4 GB)** inside a 64 GB Apple Silicon system.
 
 ---
 

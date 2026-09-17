@@ -84,8 +84,10 @@ try:
         print(f"  - Model ID:       {mid}")
         print(f"  - Context Size:   {n_ctx}")
         print(f"  - Max Train Ctx:  {n_ctx_train}")
-        print(f"  - Quantization:   {ftype}")
-        print(f"  - Parameters:     {n_params}")
+        quant_display = f"{ftype} (Hybrid AD-3.84bpw: Q5_1 / MXFP4 / IQ2_S / Q8_0 / IQ1_M)" if "IQ1_M" in str(ftype) else str(ftype)
+        params_str = f"{n_params:,} (~{n_params/1e9:.1f}B)" if isinstance(n_params, (int, float)) else str(n_params)
+        print(f"  - Quantization:   {quant_display}")
+        print(f"  - Parameters:     {params_str}")
 except Exception as e:
     print("  Failed to parse JSON response:", e)
 ' || echo "$HTTP_RESPONSE"

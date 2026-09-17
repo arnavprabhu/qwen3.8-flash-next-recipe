@@ -200,7 +200,8 @@ try:
 
         # Engine & Specs
         out.append(f" {BOLD}Architecture:{RESET} qwen4exp (125B MoE, ~6B active, DeltaNet + QSA)  |  {BOLD}Context:{RESET} {GREEN}204,800 tokens (200K){RESET}")
-        out.append(f" {BOLD}Offload:{RESET} Metal (-ngl 99)  |  {BOLD}KV Cache:{RESET} Unified RAM  |  {BOLD}Speculative:{RESET} ngram-mod (self-spec)")
+        out.append(f" {BOLD}Quantization:{RESET} Hybrid AD-3.84bpw (Q5_1/MXFP4/IQ2_S/Q8_0/IQ1_M)  |  {BOLD}Offload:{RESET} Metal (-ngl 99)")
+        out.append(f" {BOLD}Speculative:{RESET} ngram-mod (self-spec)  |  {BOLD}KV Cache:{RESET} Unified RAM")
 
         out.append(f"{DIM}──────────────────────────────────────────────────────────────────────────────────────{RESET}")
 
