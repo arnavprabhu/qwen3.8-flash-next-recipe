@@ -1,0 +1,26 @@
+# Model weights and artifacts
+models/
+*.gguf
+*.bin
+*.safetensors
+
+# llama.cpp engine source and build artifacts
+llama.cpp/
+
+# Caches and virtual environments
+hf-cache/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local agent and session states
+.fabric/
+
+# Logs and runtime process tracking
+logs/*.log
+logs/*.pid
+!logs/.gitkeep
+
+# macOS system files
+.DS_Store
+._*
